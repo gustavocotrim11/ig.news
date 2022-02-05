@@ -5,7 +5,7 @@ import { RichText } from "prismic-dom";
 
 import { getPrismicClient } from "../../services/prismic";
 
-import styles from "/post.module.scss";
+import styles from "./post.module.scss";
 
 interface PostProps {
   post: {
@@ -44,9 +44,18 @@ export const getServerSideProps: GetServerSideProps = async ({
   const session = await getSession({ req });
   const { slug } = params;
 
+  if (!session.activeSubscription) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
   const prismic = getPrismicClient(req);
 
-  const response = await prismic.getByUID("post", String(slug), {});
+  const response = await prismic.getByUID<any>("post", String(slug), {});
 
   const post = {
     slug,
